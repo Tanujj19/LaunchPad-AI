@@ -1,0 +1,12 @@
+{
+  "name": "devswarm-project",
+  "version": "1.0.0",
+  "description": "DevSwarm Project - A Parallel AI Development Showcase",
+  "scripts": {
+    "test": "jest tests"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  }
+}
