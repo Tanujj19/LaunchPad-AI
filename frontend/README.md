@@ -1,73 +1,50 @@
-# React + TypeScript + Vite
+# 🚀 LaunchPad AI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+LaunchPad AI is a multi-agent system that transforms a startup idea into a complete business blueprint in seconds.
 
-Currently, two official plugins are available:
+Instead of relying on a single AI assistant, this system orchestrates multiple specialized AI agents working in parallel to analyze, evaluate, and generate startup insights.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## ✨ Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 🔍 Market Analysis (target users, competitors, demand)
+- 🛠 Product Planning (MVP features, tech stack)
+- 💰 Business Model (revenue strategy, risks, growth)
+- 📊 Dynamic Scoring System (idea evaluation)
+- 🏷 Category Detection (FoodTech, SaaS, HealthTech, etc.)
+- 📄 Downloadable PDF Startup Blueprint
+- ⚡ Parallel AI Agent Simulation
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🧠 Multi-Agent Parallel Workflow
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+This project demonstrates parallel AI-assisted development using DevSwarm principles.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+We divided the system into independent workstreams:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Agent 1 (Market Analysis) → `agent-market` branch  
+- Agent 2 (Product Planning) → `agent-product` branch  
+- Agent 3 (Business Strategy) → `agent-business` branch  
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Each agent worked independently on separate branches, ensuring no code conflicts.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+After completion, all branches were merged into the final application.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+
+## ⚙️ Tech Stack
+
+- React + TypeScript
+- Vite
+- jsPDF
+
+---
+
+## 🚀 How to Run
+
+```bash
+cd frontend
+npm install
+npm run dev

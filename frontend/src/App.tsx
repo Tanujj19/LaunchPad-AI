@@ -1,86 +1,385 @@
-import { useState, useEffect } from 'react'
-import './App.css'
+import { useState } from "react";
+import jsPDF from "jspdf";
 
-interface Task {
-  id: number;
-  title: string;
-  completed: boolean;
-}
+type Result = {
+  market: string;
+  product: string;
+  business: string;
+  score: number;
+  verdict: string;
+  category: string;
+};
 
 function App() {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [idea, setIdea] = useState("");
+  const [result, setResult] = useState<Result | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchTasks();
-  }, []);
+  const generateAnalysis = () => {
+  if (!idea) return;
+  setLoading(true);
 
-  const fetchTasks = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/tasks');
-      const data = await response.json();
-      setTasks(data);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setTimeout(() => {
+    let market = "";
+    let product = "";
+    let business = "";
 
-  const addTask = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTaskTitle.trim()) return;
+    let score = 70; // base score
+    let verdict = "Average — Needs improvement";
 
-    try {
-      const response = await fetch('http://localhost:5000/tasks', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ title: newTaskTitle }),
-      });
+    const lowerIdea = idea.toLowerCase();
+    let category = "General";
 
-      if (response.ok) {
-        const newTask = await response.json();
-        setTasks([...tasks, newTask]);
-        setNewTaskTitle('');
-      }
-    } catch (error) {
-      console.error('Error adding task:', error);
-    }
-  };
-
-  return (
-    <div className="app-container">
-      <h1>Task Manager</h1>
-      
-      <form onSubmit={addTask} className="task-form">
-        <input
-          type="text"
-          value={newTaskTitle}
-          onChange={(e) => setNewTaskTitle(e.target.value)}
-          placeholder="Enter a new task..."
-          className="task-input"
-        />
-        <button type="submit" className="add-button">Add Task</button>
-      </form>
-
-      {loading ? (
-        <p>Loading tasks...</p>
-      ) : (
-        <ul className="task-list">
-          {tasks.map((task) => (
-            <li key={task.id} className="task-item">
-              <span className={task.completed ? 'completed' : ''}>
-                {task.title}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  )
+if (lowerIdea.includes("food") || lowerIdea.includes("chef")) {
+  category = "FoodTech";
+} else if (lowerIdea.includes("fitness") || lowerIdea.includes("health")) {
+  category = "HealthTech";
+} else if (lowerIdea.includes("ai") || lowerIdea.includes("software")) {
+  category = "SaaS";
+} else if (lowerIdea.includes("marketplace")) {
+  category = "Marketplace";
 }
 
-export default App
+    // ===== MARKET LOGIC =====
+    if (lowerIdea.includes("food") || lowerIdea.includes("chef")) {
+      market = `
+Market Size:
+Large and growing food-tech market.
+
+Target Users:
+Busy families and professionals.
+
+Competitors:
+Zomato, Swiggy.
+
+Demand:
+High — convenience driven.
+      `;
+      score += 10;
+    } else if (lowerIdea.includes("fitness") || lowerIdea.includes("health")) {
+      market = `
+Market Size:
+Expanding health & wellness industry.
+
+Target Users:
+Young adults and fitness enthusiasts.
+
+Competitors:
+Cult.fit, HealthifyMe.
+
+Demand:
+High — lifestyle trend.
+      `;
+      score += 8;
+    } else {
+      market = `
+Market Size:
+Emerging niche market.
+
+Target Users:
+Specific user groups.
+
+Competitors:
+Fragmented.
+
+Demand:
+Moderate growth potential.
+      `;
+    }
+
+    // ===== PRODUCT =====
+    product = `
+MVP Features:
+- Core functionality
+- User interaction system
+- Profiles
+
+Tech Stack:
+React + Node.js
+
+Unique Value:
+Simplifies ${idea}.
+    `;
+
+    // ===== BUSINESS =====
+    if (lowerIdea.includes("app") || lowerIdea.includes("platform")) {
+      business = `
+Revenue Model:
+Subscription + premium features
+
+Pricing:
+Freemium model
+
+Risks:
+User retention
+
+Growth:
+Digital marketing
+      `;
+      score += 7;
+    } else {
+      business = `
+Revenue Model:
+Commission-based
+
+Pricing:
+Tiered usage
+
+Risks:
+Adoption challenges
+
+Growth:
+Targeted expansion
+      `;
+    }
+
+    // ===== FINAL SCORING =====
+    if (score >= 85) {
+      verdict = "Strong — Build it";
+    } else if (score >= 75) {
+      verdict = "Good — Worth exploring";
+    } else {
+      verdict = "Average — Needs validation";
+    }
+
+    setResult({
+  market,
+  product,
+  business,
+  score,
+  verdict,
+  category,
+});
+
+    setLoading(false);
+  }, 800);
+};
+
+ const downloadPDF = () => {
+  if (!result) return;
+
+  const doc = new jsPDF();
+
+  let y = 15;
+  const pageHeight = 280;
+
+  const checkPage = () => {
+    if (y > pageHeight) {
+      doc.addPage();
+      y = 15;
+    }
+  };
+
+  // ===== HEADER (CENTERED & CLEAN) =====
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.text("LaunchPad AI", 105, y, { align: "center" });
+
+  y += 8;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(13);
+  doc.text("Startup Blueprint Report", 105, y, { align: "center" });
+
+  y += 6;
+
+  doc.setDrawColor(180);
+  doc.line(20, y, 190, y);
+
+  y += 10;
+
+  // ===== IDEA =====
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Idea: ${idea}`, 10, y);
+
+  y += 10;
+
+  // ===== SCORE BOX =====
+  doc.rect(10, y, 190, 22);
+
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Overall Score", 12, y + 6);
+
+  doc.setFontSize(18);
+ doc.text(`${result.score} / 100`, 12, y + 15);
+
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  doc.text(result.verdict, 120, y + 15);
+
+  y += 30;
+  checkPage();
+
+  // ===== SECTION FUNCTION =====
+  const addSection = (title: string, score: string, content: string) => {
+    let startY = y;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.text(title, 12, y);
+
+    y += 6;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.text(`Score: ${score}`, 12, y);
+
+    y += 6;
+
+    const lines = doc.splitTextToSize(content, 176);
+
+    lines.forEach((line: string) => {
+      checkPage();
+      doc.text(line, 12, y);
+      y += 6;
+    });
+
+    // BORDER
+    doc.rect(10, startY - 4, 190, y - startY + 4);
+
+    y += 8;
+    checkPage();
+  };
+
+addSection("Market Analysis", `${result.score - 2}/100`, result.market);
+addSection("Product Plan", `${result.score - 1}/100`, result.product);
+addSection("Business Model", `${result.score}/100`, result.business);
+
+  // ===== FOOTER =====
+  doc.setFontSize(10);
+  doc.setTextColor(120);
+  doc.text(
+    "Generated by LaunchPad AI — Parallel AI Founding Team",
+    105,
+    285,
+    { align: "center" }
+  );
+
+  doc.save("startup_blueprint.pdf");
+};
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#0f172a",
+        color: "white",
+        fontFamily: "Segoe UI",
+        padding: "40px",
+      }}
+    >
+      <div style={{ maxWidth: "800px", margin: "auto" }}>
+        <h1 style={{ textAlign: "center" }}>LaunchPad AI</h1>
+
+        <p style={{ textAlign: "center", color: "#94a3b8" }}>
+          Parallel Multi-Agent Startup Generator
+        </p>
+
+        <div style={{ display: "flex", marginTop: "30px", gap: "10px" }}>
+          <input
+            style={{
+              flex: 1,
+              padding: "12px",
+              borderRadius: "6px",
+              border: "none",
+            }}
+            placeholder="Enter your startup idea..."
+            value={idea}
+            onChange={(e) => setIdea(e.target.value)}
+          />
+
+          <button
+            onClick={generateAnalysis}
+            style={{
+              background: "#3b82f6",
+              color: "white",
+              padding: "12px 20px",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+            }}
+          >
+            Launch
+          </button>
+        </div>
+
+        {loading && (
+          <p style={{ marginTop: "20px", color: "#94a3b8" }}>
+            Running 3 AI agents in parallel...
+            <span style={{ marginLeft: "5px" }}>...</span>
+          </p>
+        )}
+
+        {result && (
+  <div style={{ marginTop: "30px" }}>
+
+    {/* CATEGORY */}
+<div style={{ marginBottom: "10px" }}>
+  <span
+    style={{
+      background: "#1e293b",
+      padding: "6px 12px",
+      borderRadius: "6px",
+      fontSize: "14px",
+      color: "#94a3b8",
+    }}
+  >
+    Category: <strong>{result.category}</strong>
+  </span>
+</div>
+
+   <div style={{ marginBottom: "15px", fontSize: "14px", color: "#94a3b8" }}>
+  🧠 Market Agent → Analysis Ready<br />
+  🛠 Product Agent → Plan Generated<br />
+  💰 Business Agent → Model Evaluated
+</div>
+
+    {/* SCORE */}
+    <div style={{ marginBottom: "15px", fontSize: "18px" }}>
+      <strong style={{ color: "#22c55e" }}>
+         {result.score} / 100
+      </strong> — {result.verdict}
+    </div>
+
+    
+
+    <div style={{ background: "#1e293b", padding: "15px", borderRadius: "10px", marginBottom: "10px" }}>
+      <strong>🧠 Market Analyst</strong>
+      <p>{result.market}</p>
+    </div>
+
+    <div style={{ background: "#1e293b", padding: "15px", borderRadius: "10px", marginBottom: "10px" }}>
+      <strong>🛠 Product Builder</strong>
+      <p>{result.product}</p>
+    </div>
+
+    <div style={{ background: "#1e293b", padding: "15px", borderRadius: "10px", marginBottom: "10px" }}>
+      <strong>💰 Business Analyst</strong>
+      <p>{result.business}</p>
+    </div>
+
+    <button
+      onClick={downloadPDF}
+      style={{
+        marginTop: "20px",
+        background: "#22c55e",
+        padding: "12px",
+        borderRadius: "6px",
+        border: "none",
+        cursor: "pointer",
+      }}
+    >
+      Download Blueprint PDF
+    </button>
+
+  </div>
+)}
+
+      </div>
+    </div>
+  );
+}
+
+export default App;
