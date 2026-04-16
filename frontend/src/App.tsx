@@ -16,370 +16,275 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   const generateAnalysis = () => {
-  if (!idea) return;
-  setLoading(true);
+    const text = idea.trim().toLowerCase();
+    if (text.length < 10) return;
 
-  setTimeout(() => {
-    let market = "";
-    let product = "";
-    let business = "";
+    setLoading(true);
 
-    let score = 70; // base score
-    let verdict = "Average — Needs improvement";
+    setTimeout(() => {
+      let category = "General";
+      let score = 70;
 
-    const lowerIdea = idea.toLowerCase();
-    let category = "General";
+      if (text.includes("food") || text.includes("chef")) {
+        category = "FoodTech";
+        score += 10;
+      } else if (text.includes("health") || text.includes("fitness")) {
+        category = "HealthTech";
+        score += 8;
+      } else if (text.includes("ai")) {
+        category = "SaaS";
+        score += 6;
+      } else if (text.includes("marketplace")) {
+        category = "Marketplace";
+        score += 7;
+      }
 
-if (lowerIdea.includes("food") || lowerIdea.includes("chef")) {
-  category = "FoodTech";
-} else if (lowerIdea.includes("fitness") || lowerIdea.includes("health")) {
-  category = "HealthTech";
-} else if (lowerIdea.includes("ai") || lowerIdea.includes("software")) {
-  category = "SaaS";
-} else if (lowerIdea.includes("marketplace")) {
-  category = "Marketplace";
-}
-
-    // ===== MARKET LOGIC =====
-    if (lowerIdea.includes("food") || lowerIdea.includes("chef")) {
-      market = `
-Market Size:
-Large and growing food-tech market.
+      const market = `Market Size:
+Growing industry with strong demand.
 
 Target Users:
-Busy families and professionals.
+Users aligned with "${idea}"
 
-Competitors:
-Zomato, Swiggy.
-
-Demand:
-High — convenience driven.
-      `;
-      score += 10;
-    } else if (lowerIdea.includes("fitness") || lowerIdea.includes("health")) {
-      market = `
-Market Size:
-Expanding health & wellness industry.
-
-Target Users:
-Young adults and fitness enthusiasts.
-
-Competitors:
-Cult.fit, HealthifyMe.
+Competition:
+Fragmented but competitive market.
 
 Demand:
-High — lifestyle trend.
-      `;
-      score += 8;
-    } else {
-      market = `
-Market Size:
-Emerging niche market.
+High potential and scalable.`;
 
-Target Users:
-Specific user groups.
-
-Competitors:
-Fragmented.
-
-Demand:
-Moderate growth potential.
-      `;
-    }
-
-    // ===== PRODUCT =====
-    product = `
-MVP Features:
-- Core functionality
+      const product = `MVP Features:
+- Core features
 - User interaction system
 - Profiles
 
 Tech Stack:
 React + Node.js
 
-Unique Value:
-Simplifies ${idea}.
-    `;
+Value:
+Solves ${idea}`;
 
-    // ===== BUSINESS =====
-    if (lowerIdea.includes("app") || lowerIdea.includes("platform")) {
-      business = `
-Revenue Model:
-Subscription + premium features
+      const business = `Revenue Model:
+Subscription / Commission
 
 Pricing:
 Freemium model
 
 Risks:
-User retention
+Scaling & adoption
 
 Growth:
-Digital marketing
-      `;
-      score += 7;
-    } else {
-      business = `
-Revenue Model:
-Commission-based
+Digital marketing`;
 
-Pricing:
-Tiered usage
+      let verdict = "Average — Needs validation";
+      if (score >= 85) verdict = "Strong — Build it";
+      else if (score >= 75) verdict = "Good — Worth exploring";
 
-Risks:
-Adoption challenges
+      setResult({
+        market,
+        product,
+        business,
+        score,
+        verdict,
+        category,
+      });
 
-Growth:
-Targeted expansion
-      `;
-    }
-
-    // ===== FINAL SCORING =====
-    if (score >= 85) {
-      verdict = "Strong — Build it";
-    } else if (score >= 75) {
-      verdict = "Good — Worth exploring";
-    } else {
-      verdict = "Average — Needs validation";
-    }
-
-    setResult({
-  market,
-  product,
-  business,
-  score,
-  verdict,
-  category,
-});
-
-    setLoading(false);
-  }, 800);
-};
-
- const downloadPDF = () => {
-  if (!result) return;
-
-  const doc = new jsPDF();
-
-  let y = 15;
-  const pageHeight = 280;
-
-  const checkPage = () => {
-    if (y > pageHeight) {
-      doc.addPage();
-      y = 15;
-    }
+      setLoading(false);
+    }, 800);
   };
 
-  // ===== HEADER (CENTERED & CLEAN) =====
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.text("LaunchPad AI", 105, y, { align: "center" });
+  // ===== PDF =====
+  const downloadPDF = () => {
+    if (!result) return;
 
-  y += 8;
+    const doc = new jsPDF();
+    let y = 15;
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(13);
-  doc.text("Startup Blueprint Report", 105, y, { align: "center" });
+    const clean = (text: string) =>
+      text.replace(/[^\x00-\x7F]/g, "");
 
-  y += 6;
+    const checkPage = () => {
+      if (y > 270) {
+        doc.addPage();
+        y = 15;
+      }
+    };
 
-  doc.setDrawColor(180);
-  doc.line(20, y, 190, y);
-
-  y += 10;
-
-  // ===== IDEA =====
-  doc.setFontSize(11);
-  doc.setFont("helvetica", "normal");
-  doc.text(`Idea: ${idea}`, 10, y);
-
-  y += 10;
-
-  // ===== SCORE BOX =====
-  doc.rect(10, y, 190, 22);
-
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.text("Overall Score", 12, y + 6);
-
-  doc.setFontSize(18);
- doc.text(`${result.score} / 100`, 12, y + 15);
-
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "normal");
-  doc.text(result.verdict, 120, y + 15);
-
-  y += 30;
-  checkPage();
-
-  // ===== SECTION FUNCTION =====
-  const addSection = (title: string, score: string, content: string) => {
-    let startY = y;
-
+    // HEADER
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.text(title, 12, y);
-
-    y += 6;
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    doc.text(`Score: ${score}`, 12, y);
-
-    y += 6;
-
-    const lines = doc.splitTextToSize(content, 176);
-
-    lines.forEach((line: string) => {
-      checkPage();
-      doc.text(line, 12, y);
-      y += 6;
-    });
-
-    // BORDER
-    doc.rect(10, startY - 4, 190, y - startY + 4);
+    doc.setFontSize(20);
+    doc.text("LaunchPad AI", 105, y, { align: "center" });
 
     y += 8;
-    checkPage();
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text("Startup Blueprint Report", 105, y, { align: "center" });
+
+    y += 10;
+    doc.line(20, y, 190, y);
+    y += 10;
+
+    doc.text(`Idea: ${clean(idea)}`, 10, y);
+    y += 12;
+
+    // SCORE BOX
+    doc.rect(10, y, 190, 22);
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Overall Score", 12, y + 6);
+
+    doc.setFontSize(18);
+    doc.text(`${result.score} / 100`, 12, y + 15);
+
+    doc.setFont("helvetica", "normal");
+    doc.text(result.verdict, 120, y + 15);
+
+    y += 30;
+
+    // ===== FIXED SECTION FUNCTION =====
+    const addSection = (title: string, content: string) => {
+      let startY = y;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.text(title, 12, y);
+
+      y += 8;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+
+      const lines = doc.splitTextToSize(clean(content), 170);
+
+      const boxTop = startY - 4;
+
+      lines.forEach((line: string) => {
+        checkPage();
+        doc.text(line, 12, y);
+        y += 6;
+      });
+
+      const boxHeight = y - boxTop;
+
+      // 🔥 BOX DRAWN AFTER CONTENT
+      doc.rect(10, boxTop, 190, boxHeight);
+
+      y += 10;
+    };
+
+    addSection("Market Analysis", result.market);
+    addSection("Product Plan", result.product);
+    addSection("Business Model", result.business);
+
+    doc.save("startup_blueprint.pdf");
   };
-
-addSection("Market Analysis", `${result.score - 2}/100`, result.market);
-addSection("Product Plan", `${result.score - 1}/100`, result.product);
-addSection("Business Model", `${result.score}/100`, result.business);
-
-  // ===== FOOTER =====
-  doc.setFontSize(10);
-  doc.setTextColor(120);
-  doc.text(
-    "Generated by LaunchPad AI — Parallel AI Founding Team",
-    105,
-    285,
-    { align: "center" }
-  );
-
-  doc.save("startup_blueprint.pdf");
-};
 
   return (
     <div
       style={{
         minHeight: "100vh",
-        background: "#0f172a",
+        width: "100%",
+        background: "linear-gradient(135deg, #0f172a, #1e293b)",
         color: "white",
-        fontFamily: "Segoe UI",
         padding: "40px",
       }}
     >
-      <div style={{ maxWidth: "800px", margin: "auto" }}>
-        <h1 style={{ textAlign: "center" }}>LaunchPad AI</h1>
+      <h1 style={{ textAlign: "center" }}>🚀 LaunchPad AI</h1>
 
-        <p style={{ textAlign: "center", color: "#94a3b8" }}>
-          Parallel Multi-Agent Startup Generator
-        </p>
+      <div style={{ display: "flex", gap: "10px", marginTop: "30px" }}>
+        <input
+          style={{
+            flex: 1,
+            padding: "16px",
+            borderRadius: "10px",
+            border: "1px solid #334155",
+            background: "#0f172a",
+            color: "white",
+          }}
+          placeholder="Enter your startup idea..."
+          value={idea}
+          onChange={(e) => setIdea(e.target.value)}
+        />
 
-        <div style={{ display: "flex", marginTop: "30px", gap: "10px" }}>
-          <input
+        <button
+          onClick={generateAnalysis}
+          style={{
+            background: "#3b82f6",
+            padding: "16px",
+            borderRadius: "10px",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          Launch
+        </button>
+      </div>
+
+      {loading && <p style={{ marginTop: "20px" }}>Running AI agents...</p>}
+
+      {result && (
+        <div style={{ marginTop: "30px" }}>
+          <p>Category: {result.category}</p>
+
+          <p>
+            🧠 Market Agent → Done <br />
+            🛠 Product Agent → Done <br />
+            💰 Business Agent → Done
+          </p>
+
+          <h2 style={{ color: "#22c55e" }}>
+            {result.score} / 100 — {result.verdict}
+          </h2>
+
+          {/* CARDS */}
+          <div
             style={{
-              flex: 1,
-              padding: "12px",
-              borderRadius: "6px",
-              border: "none",
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr",
+              gap: "20px",
+              marginTop: "20px",
             }}
-            placeholder="Enter your startup idea..."
-            value={idea}
-            onChange={(e) => setIdea(e.target.value)}
-          />
+          >
+            <div style={cardStyle}>
+              <h3>🧠 Market</h3>
+              <p style={{ whiteSpace: "pre-line" }}>{result.market}</p>
+            </div>
+
+            <div style={cardStyle}>
+              <h3>🛠 Product</h3>
+              <p style={{ whiteSpace: "pre-line" }}>{result.product}</p>
+            </div>
+
+            <div style={cardStyle}>
+              <h3>💰 Business</h3>
+              <p style={{ whiteSpace: "pre-line" }}>{result.business}</p>
+            </div>
+          </div>
 
           <button
-            onClick={generateAnalysis}
+            onClick={downloadPDF}
             style={{
-              background: "#3b82f6",
-              color: "white",
-              padding: "12px 20px",
+              marginTop: "30px",
+              width: "100%",
+              background: "#22c55e",
+              padding: "16px",
+              borderRadius: "10px",
               border: "none",
-              borderRadius: "6px",
               cursor: "pointer",
             }}
           >
-            Launch
+            Download Blueprint PDF
           </button>
         </div>
-
-        {loading && (
-          <p style={{ marginTop: "20px", color: "#94a3b8" }}>
-            Running 3 AI agents in parallel...
-            <span style={{ marginLeft: "5px" }}>...</span>
-          </p>
-        )}
-
-        {result && (
-  <div style={{ marginTop: "30px" }}>
-
-    {/* CATEGORY */}
-<div style={{ marginBottom: "10px" }}>
-  <span
-    style={{
-      background: "#1e293b",
-      padding: "6px 12px",
-      borderRadius: "6px",
-      fontSize: "14px",
-      color: "#94a3b8",
-    }}
-  >
-    Category: <strong>{result.category}</strong>
-  </span>
-</div>
-
-   <div style={{ marginBottom: "15px", fontSize: "14px", color: "#94a3b8" }}>
-  🧠 Market Agent → Analysis Ready<br />
-  🛠 Product Agent → Plan Generated<br />
-  💰 Business Agent → Model Evaluated
-</div>
-
-    {/* SCORE */}
-    <div style={{ marginBottom: "15px", fontSize: "18px" }}>
-      <strong style={{ color: "#22c55e" }}>
-         {result.score} / 100
-      </strong> — {result.verdict}
-    </div>
-
-    
-
-    <div style={{ background: "#1e293b", padding: "15px", borderRadius: "10px", marginBottom: "10px" }}>
-      <strong>🧠 Market Analyst</strong>
-      <p>{result.market}</p>
-    </div>
-
-    <div style={{ background: "#1e293b", padding: "15px", borderRadius: "10px", marginBottom: "10px" }}>
-      <strong>🛠 Product Builder</strong>
-      <p>{result.product}</p>
-    </div>
-
-    <div style={{ background: "#1e293b", padding: "15px", borderRadius: "10px", marginBottom: "10px" }}>
-      <strong>💰 Business Analyst</strong>
-      <p>{result.business}</p>
-    </div>
-
-    <button
-      onClick={downloadPDF}
-      style={{
-        marginTop: "20px",
-        background: "#22c55e",
-        padding: "12px",
-        borderRadius: "6px",
-        border: "none",
-        cursor: "pointer",
-      }}
-    >
-      Download Blueprint PDF
-    </button>
-
-  </div>
-)}
-
-      </div>
+      )}
     </div>
   );
 }
+
+const cardStyle = {
+  background: "#1e293b",
+  border: "1px solid #334155",
+  padding: "20px",
+  borderRadius: "12px",
+};
 
 export default App;
