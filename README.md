@@ -1,3 +1,4 @@
+
 # DevSwarm: Parallel AI Development Showcase
 
 ## Project Overview
@@ -56,3 +57,7 @@ From the root directory:
 npm install
 npm test
 ```
+
+# LaunchPad AI
+A multi-agent AI system that generates startup blueprints using parallel DevSwarm workflows.
+
